@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>pe.edu.upn</groupId>
-    <artifactId>pos</artifactId>
+    <artifactId>pos-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>pos</name>
-    <description>pos</description>
+    <name>pos-backend</name>
+    <description>pos-backend</description>
     <properties>
         <java.version>11</java.version>
     </properties>
