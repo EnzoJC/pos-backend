@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### RS256.key and RS256.key.pub ###
+/src/main/resources/RS256.key
+/src/main/resources/RS256.key.pub

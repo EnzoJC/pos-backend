@@ -48,4 +48,6 @@ public class UserAccount {
     @JoinColumn(name = "email_validation_status_id", nullable = false)
     private EmailValidationStatus emailValidationStatus;
 
+
+
 }
