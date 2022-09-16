@@ -2,21 +2,18 @@ package pe.edu.upn.pos.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.hateoas.RepresentationModel;
 
 @Getter
 @Setter
-public class LoginResponse {
-    private Long id;
+public class LoginResponse extends RepresentationModel<LoginResponse> {
     private String token;
     private String type = "Bearer";
     private String username;
-    private String email;
 
-    public LoginResponse(Long id, String token, String username, String email) {
-        this.id = id;
+    public LoginResponse(String token, String username) {
         this.token = token;
         this.username = username;
-        this.email = email;
     }
 
 }

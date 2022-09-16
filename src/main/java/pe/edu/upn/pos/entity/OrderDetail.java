@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "order_detail")
 public class OrderDetail {
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EmbeddedId
     private OrderDetailId id;
 

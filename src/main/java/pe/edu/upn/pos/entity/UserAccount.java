@@ -26,28 +26,26 @@ public class UserAccount {
     @Column(name = "password_hash", nullable = false, length = 250)
     private String passwordHash;
 
-    @Column(name = "pasword_salt", nullable = false, length = 100)
-    private String paswordSalt;
+    @Column(name = "password_salt", length = 100)
+    private String passwordSalt;
 
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Column(name = "confirmation_token", nullable = false, length = 100)
+    @Column(name = "confirmation_token", length = 100)
     private String confirmationToken;
 
-    @Column(name = "token_generation_time", nullable = false)
+    @Column(name = "token_generation_time")
     private Instant tokenGenerationTime;
 
-    @Column(name = "recovery_token", nullable = false, length = 100)
+    @Column(name = "recovery_token", length = 100)
     private String recoveryToken;
 
-    @Column(name = "recovery_token_time", nullable = false)
+    @Column(name = "recovery_token_time")
     private Instant recoveryTokenTime;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "email_validation_status_id", nullable = false)
     private EmailValidationStatus emailValidationStatus;
-
-
 
 }

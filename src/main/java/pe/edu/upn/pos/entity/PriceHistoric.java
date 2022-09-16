@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Table(name = "price_historic")
 public class PriceHistoric {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 

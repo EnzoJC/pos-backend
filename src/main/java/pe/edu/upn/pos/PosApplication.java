@@ -8,8 +8,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import java.net.URL;
 import java.net.URLClassLoader;
 
-
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+@SpringBootApplication
 public class PosApplication {
 
     public static void main(String[] args) {

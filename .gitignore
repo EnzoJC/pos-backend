@@ -35,3 +35,6 @@ build/
 ### RS256.key and RS256.key.pub ###
 /src/main/resources/RS256.key
 /src/main/resources/RS256.key.pub
+/src/main/resources/keypair.pem
+/src/main/resources/privatekey.key
+/src/main/resources/publickey.crt

@@ -10,13 +10,14 @@ import javax.persistence.*;
 @Entity
 @Table(name = "data_sheet")
 public class DataSheet {
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EmbeddedId
     private DataSheetId id;
 
-    @MapsId("typeDetailId")
+    @MapsId("attributeDetailId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "type_detail_id", nullable = false)
-    private AttributeDetail typeDetail;
+    @JoinColumn(name = "attribute_detail_id", nullable = false)
+    private AttributeDetail attributeDetail;
 
     @MapsId("productId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
