@@ -1,16 +1,21 @@
 package pe.edu.upn.pos.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import java.util.Set;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "role")
-public class Role {
+public class Role implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -26,4 +31,8 @@ public class Role {
             inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions;
 
+    @Override
+    public String getAuthority() {
+        return role;
+    }
 }

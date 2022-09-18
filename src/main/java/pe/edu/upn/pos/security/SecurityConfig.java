@@ -53,10 +53,11 @@ public class SecurityConfig {
                             configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
                             return configuration;
                         }
-                ).and().csrf().disable()
+                )
+                .and()
+                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/auth/login", "/api/auth/register", "/api/auth/logout")
-                .permitAll()
+                .antMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui/index.html", "/api-docs/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtEntryPoint)
