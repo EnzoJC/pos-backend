@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import pe.edu.upn.pos.security.jwt.JwtAuthenticationFilter;
-import pe.edu.upn.pos.security.jwt.JwtEntryPoint;
+import pe.edu.upn.pos.security.jwt.SecurityAuthenticationEntryPoint;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
     @Autowired
-    private JwtEntryPoint jwtEntryPoint;
+    private SecurityAuthenticationEntryPoint securityAuthenticationEntryPoint;
 
     @Bean
     public JwtAuthenticationFilter jwtTokenFilter() {
@@ -43,7 +43,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().configurationSource(
+        http
+                .cors().configurationSource(
                         request -> {
                             CorsConfiguration configuration = new CorsConfiguration();
                             configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://localhost:3000"));
@@ -55,15 +56,15 @@ public class SecurityConfig {
                         }
                 )
                 .and()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui/index.html", "/api-docs/**").permitAll()
-                .anyRequest().authenticated()
+                    .csrf().disable()
+                    .authorizeRequests()
+                    .antMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui/index.html", "/api-docs/**").permitAll()
+                    .anyRequest().authenticated()
                 .and()
-                .exceptionHandling().authenticationEntryPoint(jwtEntryPoint)
+                    .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                    .exceptionHandling().authenticationEntryPoint(securityAuthenticationEntryPoint)
                 .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+                    .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         return http.build();
     }
 }

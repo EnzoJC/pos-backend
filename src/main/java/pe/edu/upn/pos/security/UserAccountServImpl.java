@@ -19,8 +19,8 @@ import java.util.*;
 @Service
 public class UserAccountServImpl implements UserDetailsService, IUserAccountService {
 
-    @Value("${current.environment}")
-    private String currentEnvirontment;
+    @Value("${spring.profiles.active}")
+    private String currentProfile;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -30,7 +30,7 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (currentEnvirontment.equals("dev")) {
+        if (currentProfile.equals("dev")) {
             Map<String, String> users = new HashMap<>();
             users.put("test", passwordEncoder.encode("test"));
             if (users.containsKey(username)) {
