@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "email_validation_status")
+@Table(name = "email_validation_status", uniqueConstraints = @UniqueConstraint(name = "email_validation_status_ak_1", columnNames = "status"))
 public class EmailValidationStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

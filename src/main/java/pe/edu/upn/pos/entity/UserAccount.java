@@ -11,7 +11,16 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "user_account")
+@Table(
+        name = "user_account",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "user_account_ak_1", columnNames = "username"),
+                @UniqueConstraint(name = "user_account_ak_2", columnNames = "email"),
+        },
+        indexes = {
+                @Index(name = "user_idx_1", columnList = "email_validation_status_id", unique = true),
+        }
+)
 public class UserAccount {
 
     private static final String REGEX_FOR_EMAIL = "^[A-Za-z0-9+_.-]+@(.+)$";
@@ -32,9 +41,6 @@ public class UserAccount {
     @Column(name = "password_hash", nullable = false, length = 250)
     @NotEmpty
     private String passwordHash;
-
-    @Column(name = "password_salt", length = 100)
-    private String passwordSalt;
 
     @Column(name = "email", nullable = false, length = 50)
     @Email(regexp = REGEX_FOR_EMAIL)

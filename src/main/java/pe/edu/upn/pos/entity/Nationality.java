@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "nationality")
+@Table(name = "nationality", uniqueConstraints = @UniqueConstraint(name = "nationality_ak_1", columnNames = "name"))
 public class Nationality {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

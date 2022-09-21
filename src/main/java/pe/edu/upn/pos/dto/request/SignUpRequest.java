@@ -14,7 +14,7 @@ public class SignUpRequest {
     private String documentNumber;
     private String dateOfBirth;
     private String phone;
-    private String address;
+    private String address = "";
     private int nationalityId;
     private String username;
     private String password;

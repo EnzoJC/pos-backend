@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "permission")
+@Table(name = "permission", uniqueConstraints = @UniqueConstraint(name = "permission_ak_1", columnNames = "permission"))
 public class Permission implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

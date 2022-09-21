@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "document_type")
+@Table(name = "document_type", uniqueConstraints = @UniqueConstraint(name = "document_type_ak_1", columnNames = "name"))
 public class DocumentType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

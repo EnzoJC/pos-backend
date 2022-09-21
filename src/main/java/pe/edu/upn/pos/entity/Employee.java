@@ -9,7 +9,19 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-@Table(name = "employee")
+@Table(
+        name = "employee",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "employee_ak_1", columnNames = "document_number"),
+                @UniqueConstraint(name = "employee_ak_2", columnNames = "phone"),
+        },
+        indexes = {
+                @Index(name = "employee_idx_1", columnList = "gender_id", unique = true),
+                @Index(name = "employee_idx_2", columnList = "document_type_id", unique = true),
+                @Index(name = "employee_idx_2", columnList = "nationality_id", unique = true),
+                @Index(name = "employee_idx_2", columnList = "role_id", unique = true),
+        }
+)
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
