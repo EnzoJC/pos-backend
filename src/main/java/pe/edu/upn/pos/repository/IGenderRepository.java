@@ -4,4 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import pe.edu.upn.pos.entity.Gender;
 
 public interface IGenderRepository extends JpaRepository<Gender, Integer> {
+
+    Boolean existsGenderByName(String name);
 }

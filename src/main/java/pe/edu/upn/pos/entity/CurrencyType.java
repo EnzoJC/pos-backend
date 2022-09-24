@@ -1,10 +1,14 @@
 package pe.edu.upn.pos.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -17,5 +21,8 @@ public class CurrencyType {
 
     @Column(name = "currency", nullable = false, length = 20)
     private String currency;
+
+    @Column(name = "symbol", nullable = false, length = 5)
+    private String symbol;
 
 }
