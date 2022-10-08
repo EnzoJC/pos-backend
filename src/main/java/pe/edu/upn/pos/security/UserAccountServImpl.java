@@ -8,13 +8,16 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pe.edu.upn.pos.dto.request.SignUpRequest;
-import pe.edu.upn.pos.entity.Permission;
-import pe.edu.upn.pos.entity.Role;
-import pe.edu.upn.pos.entity.UserAccount;
-import pe.edu.upn.pos.repository.IUserAccountRepository;
+import pe.edu.upn.pos.entity.*;
+import pe.edu.upn.pos.exception.GlobalDateFormatException;
+import pe.edu.upn.pos.exception.NoDataFoundException;
+import pe.edu.upn.pos.repository.*;
 import pe.edu.upn.pos.service.IUserAccountService;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Optional;
 
 @Service
 public class UserAccountServImpl implements UserDetailsService, IUserAccountService {
@@ -28,28 +31,26 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
     @Autowired
     private IUserAccountRepository userAccountRepository;
 
+    @Autowired
+    private IEmployeeRepository employeeRepository;
+
+    @Autowired
+    private IGenderRepository genderRepository;
+
+    @Autowired
+    private IDocumentTypeRepository documentTypeRepository;
+
+    @Autowired
+    private INationalityRepository nationalityRepository;
+
+    @Autowired
+    private IRoleRepository roleRepository;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (currentProfile.equals("dev")) {
-            Map<String, String> users = new HashMap<>();
-            users.put("test", passwordEncoder.encode("test"));
-            if (users.containsKey(username)) {
-                return new UserDetailsImpl(username,
-                        "test@test.com",
-                        users.get("test"),
-                        List.of(new Role(
-                                        1,
-                                        "ROLE_USER",
-                                        new HashSet<>(List.of(new Permission(1, "READ")))
-                                )
-                        )
-                );
-            }
-            throw new UsernameNotFoundException(username);
-        } else {
-            UserAccount userAccount = userAccountRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
-            return UserDetailsImpl.build(userAccount);
-        }
+        UserAccount userAccount = userAccountRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+        return UserDetailsImpl.build(userAccount);
     }
 
     @Override
@@ -59,7 +60,45 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
 
     @Override
     public void save(SignUpRequest signUpRequest) {
-        UserAccount userAccount = new UserAccount();
+        Gender gender = genderRepository.findById(signUpRequest.getGenderId())
+                .orElseThrow(() -> new NoDataFoundException("genderId", String.valueOf(signUpRequest.getGenderId())));
 
+        DocumentType documentType = documentTypeRepository.findById(signUpRequest.getDocumentTypeId())
+                .orElseThrow(() -> new NoDataFoundException("documentTypeId", String.valueOf(signUpRequest.getDocumentTypeId())));
+
+        Nationality nationality = nationalityRepository.findById(signUpRequest.getNationalityId())
+                .orElseThrow(() -> new NoDataFoundException("nationalityId", String.valueOf(signUpRequest.getNationalityId())));
+
+        Role role = roleRepository.findById(signUpRequest.getRoleId())
+                .orElseThrow(() -> new NoDataFoundException("roleId", String.valueOf(signUpRequest.getRoleId())));
+
+        LocalDate dateOfBirth;
+
+        try {
+            dateOfBirth = LocalDate.parse(signUpRequest.getDateOfBirth(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } catch (DateTimeParseException e) { throw new GlobalDateFormatException("dateOfBirth"); }
+
+        UserAccount userAccount = UserAccount.builder()
+                .username(signUpRequest.getUsername())
+                .passwordHash(passwordEncoder.encode(signUpRequest.getPassword()))
+                .email(signUpRequest.getEmail())
+                .role(role)
+                .build();
+
+        Employee employee = Employee.builder()
+                .userAccount(userAccount)
+                .givenNames(signUpRequest.getGivenNames())
+                .firstLastName(signUpRequest.getFirstLastName())
+                .gender(gender)
+                .documentType(documentType)
+                .documentNumber(signUpRequest.getDocumentNumber())
+                .dateOfBirth(dateOfBirth)
+                .phone(signUpRequest.getPhone())
+                .address(signUpRequest.getAddress())
+                .nationality(nationality)
+                .build();
+
+        userAccountRepository.save(userAccount);
+        employeeRepository.save(employee);
     }
 }

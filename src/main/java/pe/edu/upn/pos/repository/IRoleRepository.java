@@ -1,11 +1,14 @@
 package pe.edu.upn.pos.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import pe.edu.upn.pos.entity.Role;
 
-public interface IRoleRepository extends JpaRepository<Role, Integer> {
-    Long countByRoleLike(String role);
+import java.util.Optional;
 
-    Boolean existsRoleByRole(String role);
+public interface IRoleRepository extends JpaRepository<Role, Integer> {
+    Long countByNameLike(String role);
+
+    Boolean existsRoleByName(String role);
+
+    Optional<Role> findByName(String role);
 }

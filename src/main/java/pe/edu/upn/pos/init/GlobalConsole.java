@@ -2,8 +2,9 @@ package pe.edu.upn.pos.init;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import pe.edu.upn.pos.entity.*;
 import pe.edu.upn.pos.repository.*;
@@ -65,8 +66,7 @@ public class GlobalConsole implements CommandLineRunner {
     private final List<DocumentType> documentTypes = List.of(
             new DocumentType(null, "DNI", 8),
             new DocumentType(null, "Carnet de Extranjería", 12),
-            new DocumentType(null, "Pasaporte", 12
-            )
+            new DocumentType(null, "Pasaporte", 9)
     );
 
     private final List<EmailValidationStatus> emailValidationStatus = List.of(
@@ -88,11 +88,20 @@ public class GlobalConsole implements CommandLineRunner {
     private final IDocumentTypeRepository documentTypeRepository;
     private final IEmailValidationStatusRepository emailValidationStatusRepository;
     private final ICurrencyTypeRepository currencyTypeRepository;
+    private final IUserAccountRepository userAccountRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    @Value("${pe.edu.upn.pos.admin.user}")
+    private String adminUser;
+
+    @Value("${pe.edu.upn.pos.admin.password}")
+    private String adminPassword;
 
     public GlobalConsole(IRoleRepository roleRepository, IPermissionRepository permissionRepository,
                          INationalityRepository nationalityRepository, IGenderRepository genderRepository,
                          IDocumentTypeRepository documentTypeRepository, IEmailValidationStatusRepository emailValidationStatusRepository,
-                         ICurrencyTypeRepository currencyTypeRepository) {
+                         ICurrencyTypeRepository currencyTypeRepository, IUserAccountRepository userAccountRepository, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.nationalityRepository = nationalityRepository;
@@ -100,20 +109,22 @@ public class GlobalConsole implements CommandLineRunner {
         this.documentTypeRepository = documentTypeRepository;
         this.emailValidationStatusRepository = emailValidationStatusRepository;
         this.currencyTypeRepository = currencyTypeRepository;
+        this.userAccountRepository = userAccountRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        logger.info("Starting insertions in database...");
+        logger.info(">>>> Starting insertions in database...");
 
         permissions.stream()
-                .filter(permission -> !permissionRepository.existsPermissionByPermission(permission.getPermission()))
+                .filter(permission -> !permissionRepository.existsPermissionByName(permission.getName()))
                 .forEach(permissionRepository::save); // equivalent to: permission -> permissionRepository.save(permission)
 
         var permissionsInDb = new HashSet<>(permissionRepository.findAll());
 
         roles.stream()
-                .filter(role -> !roleRepository.existsRoleByRole(role.getRole()))
+                .filter(role -> !roleRepository.existsRoleByName(role.getName()))
                 .forEach(role -> {
                     role.setPermissions(permissionsInDb);
                     roleRepository.save(role);
@@ -128,7 +139,7 @@ public class GlobalConsole implements CommandLineRunner {
                 .forEach(genderRepository::save);
 
         documentTypes.stream()
-                .filter(documentType -> !documentTypeRepository.existsDocumentTypeByName(documentType.getName()))
+                .filter(documentType -> !documentTypeRepository.existsDocumentTypeByType(documentType.getType()))
                 .forEach(documentTypeRepository::save);
 
         emailValidationStatus.stream()
@@ -139,6 +150,25 @@ public class GlobalConsole implements CommandLineRunner {
                 .filter(currencyType -> !currencyTypeRepository.existsCurrencyTypeByCurrency(currencyType.getCurrency()))
                 .forEach(currencyTypeRepository::save);
 
-        logger.info("Finishing insertions in database...");
+
+        if (!userAccountRepository.existsByUsername(adminUser)) {
+            logger.info("Creating the admin user...");
+
+            var adminRole = roleRepository.findByName("ROLE_ADMIN");
+            var emailStatus = emailValidationStatusRepository.findByStatus("Validated");
+            UserAccount adminUserAccount = UserAccount.builder()
+                    .username(adminUser)
+                    .passwordHash(passwordEncoder.encode(adminPassword))
+                    .email("admin@mail.com")
+                    .role(adminRole.orElseThrow(() -> new RuntimeException("Role for admin user not found")))
+                    .emailValidationStatus(emailStatus.orElseThrow(() -> new RuntimeException("Email validation status not found")))
+                    .build();
+
+            userAccountRepository.save(adminUserAccount);
+
+            logger.info(">>>> Admin user created successfully!");
+        }
+
+        logger.info(">>>> Finishing insertions in database...");
     }
 }

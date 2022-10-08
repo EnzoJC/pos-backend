@@ -12,15 +12,15 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "document_type", uniqueConstraints = @UniqueConstraint(name = "document_type_ak_1", columnNames = "name"))
+@Table(name = "document_type", uniqueConstraints = @UniqueConstraint(name = "document_type_ak_1", columnNames = "type"))
 public class DocumentType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "name", nullable = false, length = 50)
-    private String name;
+    @Column(name = "type", nullable = false, length = 50)
+    private String type;
 
     @Column(name = "length", nullable = false)
     private Integer length;

@@ -13,18 +13,18 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "permission", uniqueConstraints = @UniqueConstraint(name = "permission_ak_1", columnNames = "permission"))
+@Table(name = "permission", uniqueConstraints = @UniqueConstraint(name = "permission_ak_1", columnNames = "name"))
 public class Permission implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "permission", nullable = false, length = 50)
-    private String permission;
+    @Column(name = "name", nullable = false, length = 50)
+    private String name;
 
     @Override
     public String getAuthority() {
-        return permission;
+        return name;
     }
 }

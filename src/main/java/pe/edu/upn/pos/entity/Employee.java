@@ -1,13 +1,15 @@
 package pe.edu.upn.pos.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
+
+@Builder()
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
-@Setter
 @Entity
 @Table(
         name = "employee",
@@ -19,14 +21,17 @@ import java.time.LocalDate;
                 @Index(name = "employee_idx_1", columnList = "gender_id", unique = true),
                 @Index(name = "employee_idx_2", columnList = "document_type_id", unique = true),
                 @Index(name = "employee_idx_2", columnList = "nationality_id", unique = true),
-                @Index(name = "employee_idx_2", columnList = "role_id", unique = true),
         }
 )
 public class Employee {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id", nullable = false)
+    private UserAccount userAccount;
 
     @Column(name = "given_names", nullable = false, length = 50)
     private String givenNames;
@@ -63,9 +68,5 @@ public class Employee {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = false;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
 
 }

@@ -15,13 +15,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upn.pos.dto.request.LoginRequest;
 import pe.edu.upn.pos.dto.request.SignUpRequest;
 import pe.edu.upn.pos.dto.response.LoginResponse;
 import pe.edu.upn.pos.security.UserDetailsImpl;
 import pe.edu.upn.pos.security.jwt.JwtProvider;
+import pe.edu.upn.pos.service.IUserAccountService;
 
 import javax.validation.Valid;
 
@@ -36,11 +36,11 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private IUserAccountService userAccountService;
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/hello")
-    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(security = @SecurityRequirement(name = "Bearer"))
     public ResponseEntity<String> get() {
         return ResponseEntity.ok("Hello");
     }
@@ -51,9 +51,12 @@ public class AuthController {
                             content = {
                                     @Content(
                                             mediaType = "application/json",
-                                            array = @ArraySchema(schema = @Schema(implementation = LoginRequest.class)))
-                            })
-            })
+                                            array = @ArraySchema(schema = @Schema(implementation = LoginRequest.class))
+                                    )
+                            }
+                    )
+            }
+    )
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) throws Exception {
         Authentication authentication = authenticationManager.authenticate(
@@ -69,8 +72,8 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody SignUpRequest signUpRequest) {
-
+    public ResponseEntity<String> signUp(@RequestBody @Valid SignUpRequest signUpRequest) {
+        userAccountService.save(signUpRequest);
         return ResponseEntity.ok("Signup");
     }
 

@@ -19,18 +19,23 @@ import java.util.stream.Collectors;
 public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoDataFoundException.class)
-    public ResponseEntity<Object> handleNoDataFoundException(NoDataFoundException ex, WebRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleNoDataFoundException(NoDataFoundException ex, WebRequest request) {
         return new ResponseEntity<>(new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())), HttpStatus.OK);
     }
 
     @ExceptionHandler(ValueRepeatedException.class)
-    public ResponseEntity<Object> handleValueRepeatedException(ValueRepeatedException ex, WebRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleValueRepeatedException(ValueRepeatedException ex, WebRequest request) {
         return new ResponseEntity<>(new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())), HttpStatus.OK);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
         return new ResponseEntity<>(new ApiErrorResponse<>(HttpStatus.UNAUTHORIZED, List.of("The username or password you’ve entered is incorrect")), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(GlobalDateFormatException.class)
+    public ResponseEntity<ApiErrorResponse> handleDateFormatException(GlobalDateFormatException ex, WebRequest request) {
+        return new ResponseEntity<>(new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())), HttpStatus.OK);
     }
 
     @Override

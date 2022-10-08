@@ -5,7 +5,7 @@ import pe.edu.upn.pos.entity.Permission;
 
 public interface IPermissionRepository extends JpaRepository<Permission, Integer> {
 
-    Boolean existsPermissionByPermission(String permission);
+    Boolean existsPermissionByName(String permission);
 
-    Long countByPermissionLike(String permission);
+    Long countByNameLike(String permission);
 }

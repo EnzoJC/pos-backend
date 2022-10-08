@@ -5,5 +5,5 @@ import pe.edu.upn.pos.entity.DocumentType;
 
 public interface IDocumentTypeRepository extends JpaRepository<DocumentType, Integer> {
 
-    Boolean existsDocumentTypeByName(String name);
+    Boolean existsDocumentTypeByType(String name);
 }
