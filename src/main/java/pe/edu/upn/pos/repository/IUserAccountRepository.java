@@ -9,4 +9,6 @@ public interface IUserAccountRepository extends JpaRepository<UserAccount, Integ
     Optional<UserAccount> findByUsername(String username);
 
     Boolean existsByUsername(String username);
+
+    Boolean existsUserAccountByEmail(String email);
 }

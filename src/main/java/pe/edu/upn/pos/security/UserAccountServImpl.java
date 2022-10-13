@@ -11,6 +11,7 @@ import pe.edu.upn.pos.dto.request.SignUpRequest;
 import pe.edu.upn.pos.entity.*;
 import pe.edu.upn.pos.exception.GlobalDateFormatException;
 import pe.edu.upn.pos.exception.NoDataFoundException;
+import pe.edu.upn.pos.exception.ValueRepeatedException;
 import pe.edu.upn.pos.repository.*;
 import pe.edu.upn.pos.service.IUserAccountService;
 
@@ -46,6 +47,9 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
     @Autowired
     private IRoleRepository roleRepository;
 
+    @Autowired
+    private IEmailValidationStatusRepository emailValidationStatusRepository;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserAccount userAccount = userAccountRepository.findByUsername(username)
@@ -60,42 +64,60 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
 
     @Override
     public void save(SignUpRequest signUpRequest) {
-        Gender gender = genderRepository.findById(signUpRequest.getGenderId())
-                .orElseThrow(() -> new NoDataFoundException("genderId", String.valueOf(signUpRequest.getGenderId())));
+        Gender gender = genderRepository.findById(signUpRequest.genderId())
+                .orElseThrow(() -> new NoDataFoundException("genderId", String.valueOf(signUpRequest.genderId())));
 
-        DocumentType documentType = documentTypeRepository.findById(signUpRequest.getDocumentTypeId())
-                .orElseThrow(() -> new NoDataFoundException("documentTypeId", String.valueOf(signUpRequest.getDocumentTypeId())));
+        DocumentType documentType = documentTypeRepository.findById(signUpRequest.documentTypeId())
+                .orElseThrow(() -> new NoDataFoundException("documentTypeId", String.valueOf(signUpRequest.documentTypeId())));
 
-        Nationality nationality = nationalityRepository.findById(signUpRequest.getNationalityId())
-                .orElseThrow(() -> new NoDataFoundException("nationalityId", String.valueOf(signUpRequest.getNationalityId())));
+        Nationality nationality = nationalityRepository.findById(signUpRequest.nationalityId())
+                .orElseThrow(() -> new NoDataFoundException("nationalityId", String.valueOf(signUpRequest.nationalityId())));
 
-        Role role = roleRepository.findById(signUpRequest.getRoleId())
-                .orElseThrow(() -> new NoDataFoundException("roleId", String.valueOf(signUpRequest.getRoleId())));
+        Role role = roleRepository.findById(signUpRequest.roleId())
+                .orElseThrow(() -> new NoDataFoundException("roleId", String.valueOf(signUpRequest.roleId())));
+
+        if (userAccountRepository.existsUserAccountByEmail(signUpRequest.email())) {
+            throw new ValueRepeatedException("email", signUpRequest.email());
+        }
+
+        if (employeeRepository.existsEmployeeByPhone(signUpRequest.phone())) {
+            throw new ValueRepeatedException("phone", signUpRequest.phone());
+        }
+
+        if (employeeRepository.existsEmployeeByDocumentNumber(signUpRequest.documentNumber())) {
+            throw new ValueRepeatedException("documentNumber", signUpRequest.documentNumber());
+        }
+
+        EmailValidationStatus emailValidationStatus = emailValidationStatusRepository.findByStatus("Pending")
+                .orElseThrow(() -> new NoDataFoundException("emailValidationStatus", "Pending"));
 
         LocalDate dateOfBirth;
 
         try {
-            dateOfBirth = LocalDate.parse(signUpRequest.getDateOfBirth(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            dateOfBirth = LocalDate.parse(signUpRequest.dateOfBirth(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         } catch (DateTimeParseException e) { throw new GlobalDateFormatException("dateOfBirth"); }
 
         UserAccount userAccount = UserAccount.builder()
-                .username(signUpRequest.getUsername())
-                .passwordHash(passwordEncoder.encode(signUpRequest.getPassword()))
-                .email(signUpRequest.getEmail())
+                .username(signUpRequest.documentNumber())
+                .passwordHash(passwordEncoder.encode(signUpRequest.documentNumber()))
+                .email(signUpRequest.email())
                 .role(role)
+                .emailValidationStatus(emailValidationStatus)
                 .build();
 
         Employee employee = Employee.builder()
                 .userAccount(userAccount)
-                .givenNames(signUpRequest.getGivenNames())
-                .firstLastName(signUpRequest.getFirstLastName())
+                .givenNames(signUpRequest.givenNames())
+                .firstLastName(signUpRequest.firstLastName())
+                .secondLastName(signUpRequest.secondLastName())
                 .gender(gender)
                 .documentType(documentType)
-                .documentNumber(signUpRequest.getDocumentNumber())
+                .documentNumber(signUpRequest.documentNumber())
                 .dateOfBirth(dateOfBirth)
-                .phone(signUpRequest.getPhone())
-                .address(signUpRequest.getAddress())
+                .phone(signUpRequest.phone())
+                .address(signUpRequest.address())
                 .nationality(nationality)
+                .isActive(true)
                 .build();
 
         userAccountRepository.save(userAccount);

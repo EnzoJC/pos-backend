@@ -10,4 +10,5 @@ public interface IEmailValidationStatusRepository extends JpaRepository<EmailVal
     Boolean existsEmailValidationStatusByStatus(String status);
 
     Optional<EmailValidationStatus> findByStatus(String status);
+
 }

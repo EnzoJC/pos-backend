@@ -4,4 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import pe.edu.upn.pos.entity.Employee;
 
 public interface IEmployeeRepository extends JpaRepository<Employee, Integer> {
+
+    Boolean existsEmployeeByDocumentNumber(String documentNumber);
+
+    Boolean existsEmployeeByPhone(String phone);
 }

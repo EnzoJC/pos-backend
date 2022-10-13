@@ -39,8 +39,8 @@ public class AuthController {
     private IUserAccountService userAccountService;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/hello")
     @Operation(security = @SecurityRequirement(name = "Bearer"))
+    @GetMapping("/hello")
     public ResponseEntity<String> get() {
         return ResponseEntity.ok("Hello");
     }
@@ -71,6 +71,8 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername()));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "Bearer"))
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestBody @Valid SignUpRequest signUpRequest) {
         userAccountService.save(signUpRequest);

@@ -12,6 +12,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import pe.edu.upn.pos.dto.response.ApiErrorResponse;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,22 +22,45 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoDataFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNoDataFoundException(NoDataFoundException ex, WebRequest request) {
-        return new ResponseEntity<>(new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())),
+                HttpStatus.OK
+        );
     }
 
     @ExceptionHandler(ValueRepeatedException.class)
     public ResponseEntity<ApiErrorResponse> handleValueRepeatedException(ValueRepeatedException ex, WebRequest request) {
-        return new ResponseEntity<>(new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())),
+                HttpStatus.OK
+        );
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiErrorResponse> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
-        return new ResponseEntity<>(new ApiErrorResponse<>(HttpStatus.UNAUTHORIZED, List.of("The username or password you’ve entered is incorrect")), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(
+                new ApiErrorResponse<>(HttpStatus.UNAUTHORIZED, List.of("El nombre de usuario o la contraseña que has introducido es incorrecto")),
+                HttpStatus.UNAUTHORIZED
+        );
     }
 
     @ExceptionHandler(GlobalDateFormatException.class)
     public ResponseEntity<ApiErrorResponse> handleDateFormatException(GlobalDateFormatException ex, WebRequest request) {
-        return new ResponseEntity<>(new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())),
+                HttpStatus.OK
+        );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                new ApiErrorResponse<>(
+                        HttpStatus.BAD_REQUEST,
+                        List.of(ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage))
+                ),
+                HttpStatus.BAD_REQUEST
+        );
     }
 
     @Override
@@ -46,6 +71,9 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
 
-        return new ResponseEntity<>(new ApiErrorResponse<>(status, errors), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(
+                new ApiErrorResponse<>(status, errors),
+                HttpStatus.BAD_REQUEST
+        );
     }
 }

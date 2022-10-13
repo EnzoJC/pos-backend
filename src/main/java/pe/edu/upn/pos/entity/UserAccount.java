@@ -33,15 +33,15 @@ public class UserAccount {
     private Integer id;
 
     @Column(name = "username", nullable = false, length = 50)
-    @NotEmpty
+    @NotEmpty(message = "El nombre de usuario no puede estar vacío")
     private String username;
 
     @Column(name = "password_hash", nullable = false, length = 250)
-    @NotEmpty
+    @NotEmpty(message = "La contraseña no puede estar vacía")
     private String passwordHash;
 
     @Column(name = "email", nullable = false, length = 50)
-    @Email(regexp = REGEX_FOR_EMAIL)
+    @Email(regexp = REGEX_FOR_EMAIL, message = "El email no es válido")
     private String email;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
