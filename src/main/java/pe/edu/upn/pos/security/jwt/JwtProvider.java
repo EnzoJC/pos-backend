@@ -6,16 +6,13 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import pe.edu.upn.pos.security.UserDetailsImpl;
 import pe.edu.upn.pos.util.RSAUtils;
 
-import java.io.IOException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
@@ -34,8 +31,8 @@ public class JwtProvider {
     private RSAPrivateKey privateKey;
 
     public String generateToken(Authentication authentication) throws Exception {
-        publicKey = RSAUtils.readPublicKey(new ClassPathResource("publickey.crt").getFile());
-        privateKey = RSAUtils.readPrivateKey(new ClassPathResource("privatekey.key").getFile());
+        publicKey = RSAUtils.readPublicKey(new ClassPathResource("public-key.crt").getFile());
+        privateKey = RSAUtils.readPrivateKey(new ClassPathResource("private-key.key").getFile());
 
         UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
         //                                                          grantedAuthority -> {return grantedAuthority.getAuthority();}
@@ -52,7 +49,7 @@ public class JwtProvider {
     }
 
     public String getUsernameFromToken(String token) throws Exception {
-        publicKey = RSAUtils.readPublicKey(new ClassPathResource("publickey.crt").getFile());
+        publicKey = RSAUtils.readPublicKey(new ClassPathResource("public-key.crt").getFile());
         Algorithm algorithm = Algorithm.RSA256(publicKey, null);
         return JWT.require(algorithm)
                 .withIssuer("auth0")
@@ -62,7 +59,7 @@ public class JwtProvider {
     }
 
     public boolean validateToken(String token) throws Exception {
-        publicKey = RSAUtils.readPublicKey(new ClassPathResource("publickey.crt").getFile());
+        publicKey = RSAUtils.readPublicKey(new ClassPathResource("public-key.crt").getFile());
         Algorithm algorithm = Algorithm.RSA256(publicKey, null);
         try {
             JWTVerifier verifier = JWT.require(algorithm)

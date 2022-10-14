@@ -36,5 +36,5 @@ build/
 /src/main/resources/RS256.key
 /src/main/resources/RS256.key.pub
 /src/main/resources/keypair.pem
-/src/main/resources/privatekey.key
-/src/main/resources/publickey.crt
+/src/main/resources/private-key.key
+/src/main/resources/public-key.crt
