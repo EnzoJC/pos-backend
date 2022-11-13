@@ -32,7 +32,7 @@ services:
       - pos
 
   # Contenedor del cliente web para PostgreSQL (PgAdmin)
-  # Es posible que no se use debido a que no es necesario usar la interfaz grafica para administrar la base de datos
+  # Es posible que no se use debido a que no es necesario usar la interfaz gráfica para administrar la base de datos
   pgadmin:
     container_name: pgadmin_container
     image: dpage/pgadmin4
@@ -45,38 +45,44 @@ services:
     depends_on:
       - postgresql-db
 
-#  # Contenedor backend
-#  spring-boot-app:
-#    container_name: backend-pos
-#    build: .
-#    image: registry.gitlab.com/enzojc/pos-backend
-#    restart: always
-#    environment:
-#      - SPRING_PROFILES_ACTIVE=prod
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql-db:5432/sea_db
-#      - SPRING_DATASOURCE_USER=postgres
-#      - SPRING_DATASOURCE_PASSWORD=postgres
-#      - POS_ADMIN_USER=admin
-#      - POS_ADMIN_PASSWORD=12345
-#    ports:
-#      - '8080:8080'
-#    networks:
-#      - pos
-#    depends_on:
-#      - postgresql-db
-#
-#  # Contenedor frontend
-#  react-app:
-#    # build: .
-#    container_name: frontend-pos
-#    image: registry.gitlab.com/andreac20/proyecto-tienda
-#    restart: always
-#    ports:
-#      - '3000:3000'
-#    networks:
-#      - pos
-#    depends_on:
-#      - spring-boot-app
+  # Contenedor backend
+  spring-boot-app:
+    container_name: backend-pos
+    build: .
+    image: registry.gitlab.com/enzojc/pos-backend
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql-db:5432/sea_db
+      - SPRING_DATASOURCE_USER=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - POS_ADMIN_USER=admin
+      - POS_ADMIN_PASSWORD=12345
+      - POS_FRONTEND_URL=http://localhost:3000
+      - POS_FRONTEND_PATH_EMAIL_CONFIRMATION=/verifyEmail?token=
+      - SPRING_MAIL_HOST=${MAIL_HOST}
+      - SPRING_MAIL_PORT=${MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${EMAIL}
+      - SPRING_MAIL_PASSWORD=${PASSWORD}
+    ports:
+      - '8080:8080'
+    networks:
+      - pos
+    depends_on:
+      - postgresql-db
+
+  # Contenedor frontend
+  react-app:
+    # build: .
+    container_name: frontend-pos
+    image: registry.gitlab.com/andreac20/proyecto-tienda
+    restart: always
+    ports:
+      - '3000:3000'
+    networks:
+      - pos
+    depends_on:
+      - spring-boot-app
 
 # Definicion de los volumes
 volumes:

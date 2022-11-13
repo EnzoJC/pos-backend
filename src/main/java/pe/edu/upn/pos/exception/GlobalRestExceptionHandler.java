@@ -28,6 +28,14 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
+    @ExceptionHandler(TokenNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleTokenNotFoundException(TokenNotFoundException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())),
+                HttpStatus.NOT_FOUND
+        );
+    }
+
     @ExceptionHandler(ValueRepeatedException.class)
     public ResponseEntity<ApiErrorResponse> handleValueRepeatedException(ValueRepeatedException ex, WebRequest request) {
         return new ResponseEntity<>(

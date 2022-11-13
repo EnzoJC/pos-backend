@@ -41,13 +41,6 @@ public class AuthController {
         this.userAccountService = userAccountService;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(security = @SecurityRequirement(name = "Bearer"))
-    @GetMapping("/hello")
-    public ResponseEntity<String> get() {
-        return ResponseEntity.ok("Hello");
-    }
-
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -79,7 +72,7 @@ public class AuthController {
         );
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER_SUPERVISOR')")
     @Operation(security = @SecurityRequirement(name = "Bearer"))
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestBody @Valid SignUpRequest signUpRequest) {

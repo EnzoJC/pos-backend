@@ -12,6 +12,7 @@ import pe.edu.upn.pos.email.IEmailSender;
 import pe.edu.upn.pos.entity.*;
 import pe.edu.upn.pos.exception.GlobalDateFormatException;
 import pe.edu.upn.pos.exception.NoDataFoundException;
+import pe.edu.upn.pos.exception.TokenNotFoundException;
 import pe.edu.upn.pos.exception.ValueRepeatedException;
 import pe.edu.upn.pos.repository.*;
 import pe.edu.upn.pos.service.IUserAccountService;
@@ -144,7 +145,7 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
 
     @Override
     public VerificationEmailResponse verifyEmail(String token) {
-        UserAccount userAccount = userAccountRepository.findByConfirmationToken(token).orElseThrow(() -> new NoDataFoundException("token", token));
+        UserAccount userAccount = userAccountRepository.findByConfirmationToken(token).orElseThrow(() -> new TokenNotFoundException(token));
 
         if (userAccount.getTokenGenerationTime().isAfter(LocalDateTime.now())) {
             userAccount.setIsEmailVerified(true);
