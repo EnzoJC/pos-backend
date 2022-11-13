@@ -40,16 +40,4 @@ build/
 /src/main/resources/public-key.crt
 
 ### Environment variables ###
-<<<<<<< Updated upstream
-/.env
-=======
-<<<<<<< Updated upstream
 .env
-=======
-<<<<<<< Updated upstream
-.env!/.env
-=======
-.env
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> Stashed changes
