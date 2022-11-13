@@ -40,4 +40,4 @@ build/
 /src/main/resources/public-key.crt
 
 ### Environment variables ###
-.env!/.env
+/.env
