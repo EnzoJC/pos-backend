@@ -1,7 +1,7 @@
 package pe.edu.upn.pos.dto.response;
 
-public record LoginResponse(String token, String type, String username) {
-    public LoginResponse (String token, String username) {
-        this(token, "Bearer", username);
+public record LoginResponse(String token, String type, String username, String role) {
+    public LoginResponse(String token, String username, String role) {
+        this(token, "Bearer", username, role);
     }
 }

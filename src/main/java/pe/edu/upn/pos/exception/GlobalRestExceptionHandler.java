@@ -23,8 +23,8 @@ public class GlobalRestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NoDataFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNoDataFoundException(NoDataFoundException ex, WebRequest request) {
         return new ResponseEntity<>(
-                new ApiErrorResponse<>(HttpStatus.OK, List.of(ex.getMessage())),
-                HttpStatus.OK
+                new ApiErrorResponse<>(HttpStatus.NOT_FOUND, List.of(ex.getMessage())),
+                HttpStatus.NOT_FOUND
         );
     }
 

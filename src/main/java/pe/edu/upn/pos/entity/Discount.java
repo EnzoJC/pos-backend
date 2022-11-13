@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
@@ -30,7 +31,7 @@ public class Discount {
     private Integer quantity;
 
     @Column(name = "price")
-    private Integer price;
+    private BigDecimal price;
 
     @Column(name = "valid_from", nullable = false)
     private Instant validFrom;
@@ -42,7 +43,7 @@ public class Discount {
     private Integer minimumOrder;
 
     @Column(name = "maximum_discount_amount", nullable = false)
-    private Integer maximumDiscountAmount;
+    private BigDecimal maximumDiscountAmount;
 
     @Column(name = "discount_limit", nullable = false)
     private Integer discountLimit;

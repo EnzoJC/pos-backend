@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import pe.edu.upn.pos.dto.request.LoginRequest;
 import pe.edu.upn.pos.dto.request.SignUpRequest;
 import pe.edu.upn.pos.dto.response.LoginResponse;
+import pe.edu.upn.pos.dto.response.VerificationEmailResponse;
 import pe.edu.upn.pos.security.UserDetailsImpl;
 import pe.edu.upn.pos.security.jwt.JwtProvider;
 import pe.edu.upn.pos.service.IUserAccountService;
@@ -29,14 +29,17 @@ import javax.validation.Valid;
 @RequestMapping("/api/auth")
 @Tag(name = "Authorization", description = "Contains the Login and Sign Up APIs")
 public class AuthController {
-    @Autowired
-    private JwtProvider jwtProvider;
+    private final JwtProvider jwtProvider;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private IUserAccountService userAccountService;
+    private final IUserAccountService userAccountService;
+
+    public AuthController(JwtProvider jwtProvider, AuthenticationManager authenticationManager, IUserAccountService userAccountService) {
+        this.jwtProvider = jwtProvider;
+        this.authenticationManager = authenticationManager;
+        this.userAccountService = userAccountService;
+    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(security = @SecurityRequirement(name = "Bearer"))
@@ -68,7 +71,12 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtProvider.generateToken(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        return ResponseEntity.ok(new LoginResponse(jwt, userDetails.getUsername()));
+        return ResponseEntity.ok(new LoginResponse(
+                jwt,
+                userDetails.getUsername(),
+                userDetails.getAuthorities().stream().findFirst().orElseThrow(() -> new Exception("No role found")).getAuthority()
+                )
+        );
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -77,6 +85,12 @@ public class AuthController {
     public ResponseEntity<String> signUp(@RequestBody @Valid SignUpRequest signUpRequest) {
         userAccountService.save(signUpRequest);
         return ResponseEntity.ok("Signup");
+    }
+
+    @GetMapping("/email-verification")
+    public ResponseEntity<VerificationEmailResponse> verifyEmail(@RequestParam(name = "token") String token) {
+        VerificationEmailResponse verificationEmailResponse = userAccountService.verifyEmail(token);
+        return ResponseEntity.ok(verificationEmailResponse);
     }
 
 }

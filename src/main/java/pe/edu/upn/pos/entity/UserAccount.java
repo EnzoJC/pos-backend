@@ -5,12 +5,13 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder()
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Entity
 @Table(
         name = "user_account",
@@ -19,8 +20,7 @@ import java.time.Instant;
                 @UniqueConstraint(name = "user_account_ak_2", columnNames = "email"),
         },
         indexes = {
-                @Index(name = "user_account_idx_1", columnList = "email_validation_status_id", unique = true),
-                @Index(name = "user_account_idx_2", columnList = "role_id", unique = true),
+                @Index(name = "user_account_idx_1", columnList = "role_id", unique = true),
         }
 )
 public class UserAccount {
@@ -44,24 +44,23 @@ public class UserAccount {
     @Email(regexp = REGEX_FOR_EMAIL, message = "El email no es válido")
     private String email;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
-
     @Column(name = "confirmation_token", length = 100)
     private String confirmationToken;
 
+    @Column(name = "is_email_verified", nullable = false)
+    private Boolean isEmailVerified;
+
     @Column(name = "token_generation_time")
-    private Instant tokenGenerationTime;
+    private LocalDateTime tokenGenerationTime;
 
     @Column(name = "recovery_token", length = 100)
     private String recoveryToken;
 
     @Column(name = "recovery_token_time")
-    private Instant recoveryTokenTime;
+    private LocalDateTime recoveryTokenTime;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "email_validation_status_id", nullable = false)
-    private EmailValidationStatus emailValidationStatus;
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
 }

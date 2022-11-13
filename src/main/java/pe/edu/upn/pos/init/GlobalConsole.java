@@ -69,12 +69,6 @@ public class GlobalConsole implements CommandLineRunner {
             new DocumentType(null, "Pasaporte", 9)
     );
 
-    private final List<EmailValidationStatus> emailValidationStatus = List.of(
-            new EmailValidationStatus(null, "Pending"),
-            new EmailValidationStatus(null, "Validated"),
-            new EmailValidationStatus(null, "Not Validated")
-    );
-
     private final List<CurrencyType> currencyTypes = List.of(
             new CurrencyType(null, "Soles", "S/"),
             new CurrencyType(null, "Dólares", "US$"),
@@ -86,7 +80,7 @@ public class GlobalConsole implements CommandLineRunner {
     private final INationalityRepository nationalityRepository;
     private final IGenderRepository genderRepository;
     private final IDocumentTypeRepository documentTypeRepository;
-    private final IEmailValidationStatusRepository emailValidationStatusRepository;
+
     private final ICurrencyTypeRepository currencyTypeRepository;
     private final IUserAccountRepository userAccountRepository;
 
@@ -100,14 +94,13 @@ public class GlobalConsole implements CommandLineRunner {
 
     public GlobalConsole(IRoleRepository roleRepository, IPermissionRepository permissionRepository,
                          INationalityRepository nationalityRepository, IGenderRepository genderRepository,
-                         IDocumentTypeRepository documentTypeRepository, IEmailValidationStatusRepository emailValidationStatusRepository,
-                         ICurrencyTypeRepository currencyTypeRepository, IUserAccountRepository userAccountRepository, PasswordEncoder passwordEncoder) {
+                         IDocumentTypeRepository documentTypeRepository, ICurrencyTypeRepository currencyTypeRepository,
+                         IUserAccountRepository userAccountRepository, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.nationalityRepository = nationalityRepository;
         this.genderRepository = genderRepository;
         this.documentTypeRepository = documentTypeRepository;
-        this.emailValidationStatusRepository = emailValidationStatusRepository;
         this.currencyTypeRepository = currencyTypeRepository;
         this.userAccountRepository = userAccountRepository;
         this.passwordEncoder = passwordEncoder;
@@ -142,26 +135,21 @@ public class GlobalConsole implements CommandLineRunner {
                 .filter(documentType -> !documentTypeRepository.existsDocumentTypeByType(documentType.getType()))
                 .forEach(documentTypeRepository::save);
 
-        emailValidationStatus.stream()
-                .filter(emailValidationStatus1 -> !emailValidationStatusRepository.existsEmailValidationStatusByStatus(emailValidationStatus1.getStatus()))
-                .forEach(emailValidationStatusRepository::save);
-
         currencyTypes.stream()
                 .filter(currencyType -> !currencyTypeRepository.existsCurrencyTypeByCurrency(currencyType.getCurrency()))
                 .forEach(currencyTypeRepository::save);
 
 
         if (!userAccountRepository.existsByUsername(adminUser)) {
-            logger.info("Creating the admin user...");
+            logger.info(">>>> Creating the admin user...");
 
             var adminRole = roleRepository.findByName("ROLE_ADMIN");
-            var emailStatus = emailValidationStatusRepository.findByStatus("Validated");
             UserAccount adminUserAccount = UserAccount.builder()
                     .username(adminUser)
                     .passwordHash(passwordEncoder.encode(adminPassword))
                     .email("admin@mail.com")
                     .role(adminRole.orElseThrow(() -> new RuntimeException("Role for admin user not found")))
-                    .emailValidationStatus(emailStatus.orElseThrow(() -> new RuntimeException("Email validation status not found")))
+                    .isEmailVerified(true)
                     .build();
 
             userAccountRepository.save(adminUserAccount);

@@ -14,9 +14,3 @@ public record ApiErrorResponse<T>(
         this(status, LocalDateTime.now(ZoneOffset.ofHours(-5)), errors);
     }
 }
-
-record DetailErrorMessageResponse(
-        String message,
-        String clearMessage) {
-
-}

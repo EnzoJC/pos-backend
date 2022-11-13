@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -28,10 +29,10 @@ public class OrderDetail {
     private Integer quantity;
 
     @Column(name = "unit_price", nullable = false)
-    private Integer unitPrice;
+    private BigDecimal unitPrice;
 
     @Column(name = "sub_total", nullable = false)
-    private Integer subTotal;
+    private BigDecimal subTotal;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_id")

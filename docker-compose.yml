@@ -2,76 +2,88 @@ version: '3.7'
 
 # Definicion de los servicios
 services:
-    # Contenedor del PostgreSQL
-    postgresql-db:
-        container_name: postgresql_container
-        image: postgres:13
-        restart: always
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-            - POSTGRES_DB=sea_db
-        ports:
-            - '5432:5432'
-        volumes:
-            - db:/var/lib/postgresql/data
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-        networks:
-            - pos
 
-    # Contenedor del cliente web para PostgreSQL (PgAdmin)
-    # Es posible que no se use debido a que no es necesario usar la interfaz grafica para administrar la base de datos
-    pgadmin:
-        container_name: pgadmin_container
-        image: dpage/pgadmin4
-        restart: always
-        environment:
-            - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-            - PGADMIN_DEFAULT_PASSWORD=root
-        ports:
-            - '5050:80'
-        depends_on:
-            - postgresql-db
+  # Contenedor de servidor de correo SMTP para testing
+  mail-dev:
+    image: maildev/maildev
+    container_name: maildev_container
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    restart: always
+    networks:
+      - pos
 
-    # Contenedor backend
-    spring-boot-app:
-        container_name: backend-pos
-        build: .
-        image: registry.gitlab.com/enzojc/pos-backend
-        restart: always
-        environment:
-            - SPRING_PROFILES_ACTIVE=prod
-            - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql-db:5432/sea_db
-            - SPRING_DATASOURCE_USER=postgres
-            - SPRING_DATASOURCE_PASSWORD=postgres
-            - POS_ADMIN_USER=admin
-            - POS_ADMIN_PASSWORD=12345
-        ports:
-            - '8080:8080'
-        networks:
-            - pos
-        depends_on:
-            - postgresql-db
+  # Contenedor del PostgreSQL
+  postgresql-db:
+    container_name: postgresql_container
+    image: postgres:13
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=sea_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - pos
 
-    # Contenedor frontend
-    react-app:
-        # build: .
-        container_name: frontend-pos
-        image: registry.gitlab.com/andreac20/proyecto-tienda
-        restart: always
-        ports:
-            - '3000:3000'
-        networks:
-            - pos
-        depends_on:
-            - spring-boot-app
+  # Contenedor del cliente web para PostgreSQL (PgAdmin)
+  # Es posible que no se use debido a que no es necesario usar la interfaz grafica para administrar la base de datos
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    ports:
+      - '5050:80'
+    depends_on:
+      - postgresql-db
+
+#  # Contenedor backend
+#  spring-boot-app:
+#    container_name: backend-pos
+#    build: .
+#    image: registry.gitlab.com/enzojc/pos-backend
+#    restart: always
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=prod
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql-db:5432/sea_db
+#      - SPRING_DATASOURCE_USER=postgres
+#      - SPRING_DATASOURCE_PASSWORD=postgres
+#      - POS_ADMIN_USER=admin
+#      - POS_ADMIN_PASSWORD=12345
+#    ports:
+#      - '8080:8080'
+#    networks:
+#      - pos
+#    depends_on:
+#      - postgresql-db
+#
+#  # Contenedor frontend
+#  react-app:
+#    # build: .
+#    container_name: frontend-pos
+#    image: registry.gitlab.com/andreac20/proyecto-tienda
+#    restart: always
+#    ports:
+#      - '3000:3000'
+#    networks:
+#      - pos
+#    depends_on:
+#      - spring-boot-app
 
 # Definicion de los volumes
 volumes:
-    db:
-        driver: local
+  db:
+    driver: local
 
 # Redes para facilitar la comunicacion entre contenedores
 networks:
-    pos:
-        driver: bridge
+  pos:
+    driver: bridge

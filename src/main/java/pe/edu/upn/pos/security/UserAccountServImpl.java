@@ -1,6 +1,5 @@
 package pe.edu.upn.pos.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -8,6 +7,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pe.edu.upn.pos.dto.request.SignUpRequest;
+import pe.edu.upn.pos.dto.response.VerificationEmailResponse;
+import pe.edu.upn.pos.email.IEmailSender;
 import pe.edu.upn.pos.entity.*;
 import pe.edu.upn.pos.exception.GlobalDateFormatException;
 import pe.edu.upn.pos.exception.NoDataFoundException;
@@ -16,9 +17,11 @@ import pe.edu.upn.pos.repository.*;
 import pe.edu.upn.pos.service.IUserAccountService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserAccountServImpl implements UserDetailsService, IUserAccountService {
@@ -26,29 +29,35 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
     @Value("${spring.profiles.active}")
     private String currentProfile;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private IUserAccountRepository userAccountRepository;
+    private final IUserAccountRepository userAccountRepository;
 
-    @Autowired
-    private IEmployeeRepository employeeRepository;
+    private final IEmployeeRepository employeeRepository;
 
-    @Autowired
-    private IGenderRepository genderRepository;
+    private final IGenderRepository genderRepository;
 
-    @Autowired
-    private IDocumentTypeRepository documentTypeRepository;
+    private final IDocumentTypeRepository documentTypeRepository;
 
-    @Autowired
-    private INationalityRepository nationalityRepository;
+    private final INationalityRepository nationalityRepository;
 
-    @Autowired
-    private IRoleRepository roleRepository;
+    private final IRoleRepository roleRepository;
 
-    @Autowired
-    private IEmailValidationStatusRepository emailValidationStatusRepository;
+    private final IEmailSender emailSender;
+
+    public UserAccountServImpl(PasswordEncoder passwordEncoder, IUserAccountRepository userAccountRepository,
+                               IEmployeeRepository employeeRepository, IGenderRepository genderRepository,
+                               IDocumentTypeRepository documentTypeRepository, INationalityRepository nationalityRepository,
+                               IRoleRepository roleRepository, IEmailSender emailSender) {
+        this.passwordEncoder = passwordEncoder;
+        this.userAccountRepository = userAccountRepository;
+        this.employeeRepository = employeeRepository;
+        this.genderRepository = genderRepository;
+        this.documentTypeRepository = documentTypeRepository;
+        this.nationalityRepository = nationalityRepository;
+        this.roleRepository = roleRepository;
+        this.emailSender = emailSender;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -60,6 +69,11 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
     @Override
     public Optional<UserAccount> findByUsername(String username) {
         return userAccountRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<UserAccount> findByUsernameAndAndIsEmailVerifiedIsTrue(String username) {
+        return userAccountRepository.findByUsernameAndAndIsEmailVerifiedIsTrue(username);
     }
 
     @Override
@@ -88,21 +102,24 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
             throw new ValueRepeatedException("documentNumber", signUpRequest.documentNumber());
         }
 
-        EmailValidationStatus emailValidationStatus = emailValidationStatusRepository.findByStatus("Pending")
-                .orElseThrow(() -> new NoDataFoundException("emailValidationStatus", "Pending"));
-
         LocalDate dateOfBirth;
 
         try {
             dateOfBirth = LocalDate.parse(signUpRequest.dateOfBirth(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (DateTimeParseException e) { throw new GlobalDateFormatException("dateOfBirth"); }
+        } catch (DateTimeParseException e) {
+            throw new GlobalDateFormatException("dateOfBirth");
+        }
+
+        String confirmationToken = UUID.randomUUID().toString();
 
         UserAccount userAccount = UserAccount.builder()
                 .username(signUpRequest.documentNumber())
                 .passwordHash(passwordEncoder.encode(signUpRequest.documentNumber()))
                 .email(signUpRequest.email())
                 .role(role)
-                .emailValidationStatus(emailValidationStatus)
+                .isEmailVerified(false)
+                .confirmationToken(confirmationToken)
+                .tokenGenerationTime(LocalDateTime.now().plusHours(6)) // TODO: this value should be in application.properties
                 .build();
 
         Employee employee = Employee.builder()
@@ -121,6 +138,20 @@ public class UserAccountServImpl implements UserDetailsService, IUserAccountServ
                 .build();
 
         userAccountRepository.save(userAccount);
+        emailSender.sendConfirmationToken(signUpRequest, confirmationToken, "email-template");
         employeeRepository.save(employee);
+    }
+
+    @Override
+    public VerificationEmailResponse verifyEmail(String token) {
+        UserAccount userAccount = userAccountRepository.findByConfirmationToken(token).orElseThrow(() -> new NoDataFoundException("token", token));
+
+        if (userAccount.getTokenGenerationTime().isAfter(LocalDateTime.now())) {
+            userAccount.setIsEmailVerified(true);
+            userAccountRepository.save(userAccount);
+            return new VerificationEmailResponse("success", "Your email has been verified successfully");
+        } else {
+            return new VerificationEmailResponse("error", "Your token has expired. Please request a new one");
+        }
     }
 }
