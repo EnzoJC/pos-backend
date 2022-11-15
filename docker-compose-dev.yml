@@ -1,0 +1,67 @@
+version: '3.7'
+
+# Definicion de los servicios
+services:
+
+  # Contenedor de servidor de correo SMTP para testing
+  mail-dev:
+    image: maildev/maildev
+    container_name: maildev_container
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    restart: always
+    networks:
+      - pos
+
+  # Contenedor del PostgreSQL
+  postgresql-db:
+    container_name: postgresql_container
+    image: postgres:13
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=sea_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - pos
+
+  # Contenedor del cliente web para PostgreSQL (PgAdmin)
+  # Es posible que no se use debido a que no es necesario usar la interfaz gráfica para administrar la base de datos
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    ports:
+      - '5050:80'
+    depends_on:
+      - postgresql-db
+
+  # Contenedor frontend
+  react-app:
+    # build: .
+    container_name: frontend-pos
+    image: registry.gitlab.com/andreac20/proyecto-tienda
+    restart: always
+    ports:
+      - '3000:3000'
+    networks:
+      - pos
+
+# Definicion de los volumes
+volumes:
+  db:
+    driver: local
+
+# Redes para facilitar la comunicacion entre contenedores
+networks:
+  pos:
+    driver: bridge

@@ -28,7 +28,8 @@ public class CompanyController {
         return ResponseEntity.ok("Created");
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'CASHIER_SUPERVISOR')")
+//    @PreAuthorize("hasAnyRole('ADMIN', 'CASHIER', 'CASHIER_SUPERVISOR')")
+//    @Operation(security = @SecurityRequirement(name = "Bearer"))
     @GetMapping
     public ResponseEntity<CompanyDTO> getCompany() {
         return ResponseEntity.ok(companyService.getCompany());
