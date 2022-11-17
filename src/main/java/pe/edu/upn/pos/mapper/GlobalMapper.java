@@ -3,6 +3,7 @@ package pe.edu.upn.pos.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import pe.edu.upn.pos.dto.*;
+import pe.edu.upn.pos.dto.response.EmployeeResponse;
 import pe.edu.upn.pos.entity.*;
 
 import java.util.List;
@@ -30,4 +31,15 @@ public interface GlobalMapper {
     NationalityDTO mapNationalityEntityToNationalityDTO(Nationality nationality);
 
     List<NationalityDTO> mapListNationalityEntityToListNationalityDTO(List<Nationality> nationalityList);
+
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "userAccount.username", target = "username")
+    @Mapping(source = "userAccount.email", target = "email")
+    @Mapping(source = "userAccount.role.name", target = "role")
+    @Mapping(source = "gender.name", target = "gender")
+    @Mapping(source = "documentType.type", target = "documentType")
+    @Mapping(source = "nationality.name", target = "nationality")
+    EmployeeResponse mapEmployeeEntityToEmployeeResponse(Employee employee);
+
+    List<EmployeeResponse> mapListEmployeeEntityToListEmployeeResponse(List<Employee> employeeList);
 }
