@@ -4,6 +4,6 @@ Un proyecto de punto de venta con modulos básicos (gestión de usuarios, gesti�
 
 ## Diagrama de la Base de Datos
 
-<img src="file:///C:/Users/joaoe/Repositorios/Spring%20Boot/pos-backend/img/physical%20model.png" title="Title" alt="alt text" data-align="center">
+<img src="https://github.com/EnzoJC/pos-backend/blob/master/img/physical%20model.png" title="Title" alt="alt text" data-align="center">
 
 
